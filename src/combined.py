@@ -59,3 +59,4 @@ def simulate_ron_game(decks: list[list[str]], player1_choice: list[str], player2
 
 
 
+# save them to processed data. The scores for each deck. 
