@@ -27,6 +27,7 @@ def generate_decks(count: int) -> list[list[str]]:
 
 
 # --- NumPy save/load utilities ---
+# --- NumPy save/load utilities ---
 def save_decks_np(decks: list[list[str]], output_path: str | Path = None) -> Path:
     """
     Save decks as a single NumPy array file (.npy).
@@ -40,6 +41,26 @@ def save_decks_np(decks: list[list[str]], output_path: str | Path = None) -> Pat
     arr = np.array(decks)
     np.save(output_path, arr)
     return output_path
+
+
+def save_decks_np_chunked(decks: list[list[str]], output_dir: str | Path = None, chunk_size: int = 1000, prefix: str = "decks") -> list[Path]:
+    """
+    Save decks in multiple .npy files, each containing up to chunk_size decks.
+    Returns a list of saved file paths.
+    """
+    if output_dir is None:
+        output_dir = Path(__file__).parent / "raw_decks"
+    else:
+        output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    saved_files = []
+    total = len(decks)
+    for i, start in enumerate(range(0, total, chunk_size), 1):
+        chunk = decks[start:start+chunk_size]
+        file_path = output_dir / f"{prefix}_{i:04d}.npy"
+        np.save(file_path, np.array(chunk))
+        saved_files.append(file_path)
+    return saved_files
 
 def load_decks_np(input_path: str | Path = None) -> np.ndarray:
     """
@@ -55,8 +76,9 @@ def load_decks_np(input_path: str | Path = None) -> np.ndarray:
 if __name__ == "__main__":
     # Number of decks to generate
     total_decks = 1000000
-    output_path = Path(__file__).parent / "raw_decks" / "decks.npy"
+    chunk_size = 1000
+    output_dir = Path(__file__).parent / "raw_decks"
 
     decks = generate_decks(total_decks)
-    save_decks_np(decks, output_path)
-    print(f"Saved {total_decks} decks as a NumPy array to {output_path}")
+    saved_files = save_decks_np_chunked(decks, output_dir, chunk_size=chunk_size)
+    print(f"Saved {total_decks} decks in {len(saved_files)} .npy files (chunk size: {chunk_size}) to {output_dir}")
