@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-import json
+
 import random
 from pathlib import Path
+import numpy as np
 
 
 def generate_deck() -> list[str]:
@@ -24,51 +25,38 @@ def generate_decks(count: int) -> list[list[str]]:
     return [generate_deck() for _ in range(count)]
 
 
-def save_decks(
-    decks: list[list[str]],
-    output_dir: str | Path,
-    chunk_size: int = 10_000,
-    prefix: str = "raw_decks",
-) -> list[Path]:
+
+# --- NumPy save/load utilities ---
+def save_decks_np(decks: list[list[str]], output_path: str | Path = None) -> Path:
     """
-    Save decks as JSONL files in chunked, 
-    append-only batches. Each line is a JSON 
-    array of "1"/"0" strings representing one 
-    deck. New files are created sequentially 
-    so existing data is never touched.
+    Save decks as a single NumPy array file (.npy).
+    Each deck is a list of "1"/"0" strings.
     """
-    if chunk_size <= 0:
-        raise ValueError("chunk_size must be a positive integer")
+    if output_path is None:
+        output_path = Path(__file__).parent / "raw_decks" / "decks.npy"
+    else:
+        output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    arr = np.array(decks)
+    np.save(output_path, arr)
+    return output_path
 
-    output_path = Path(output_dir)
-    output_path.mkdir(parents=True, exist_ok=True)
-
-    existing = sorted(output_path.glob(f"{prefix}_*.jsonl"))
-    next_index = len(existing) + 1
-
-    saved_files: list[Path] = []
-    for start in range(0, len(decks), chunk_size):
-        chunk = decks[start : start + chunk_size]
-        file_path = output_path / f"{prefix}_{next_index:04d}.jsonl"
-        with file_path.open("w", encoding="utf-8") as handle:
-            for deck in chunk:
-                handle.write(json.dumps(deck))
-                handle.write("\n")
-        saved_files.append(file_path)
-        next_index += 1
-
-    return saved_files
+def load_decks_np(input_path: str | Path = None) -> np.ndarray:
+    """
+    Load decks from a NumPy .npy file.
+    Returns a NumPy array of decks.
+    """
+    if input_path is None:
+        input_path = Path(__file__).parent / "raw_decks" / "decks.npy"
+    else:
+        input_path = Path(input_path)
+    return np.load(input_path, allow_pickle=False)
 
 if __name__ == "__main__":
     # Number of decks to generate
     total_decks = 1000000
-    chunk_size = 1000
-    output_dir = "raw_decks"  # This will create data/raw_decks in your project
-
-    from pathlib import Path
-    raw_decks_path = Path(__file__).parent / output_dir
-    raw_decks_path.mkdir(parents=True, exist_ok=True)
+    output_path = Path(__file__).parent / "raw_decks" / "decks.npy"
 
     decks = generate_decks(total_decks)
-    save_decks(decks, raw_decks_path, chunk_size=chunk_size)
-    print(f"Saved {total_decks} decks in chunks of {chunk_size} to {raw_decks_path}")
+    save_decks_np(decks, output_path)
+    print(f"Saved {total_decks} decks as a NumPy array to {output_path}")
