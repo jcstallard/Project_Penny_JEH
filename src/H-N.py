@@ -92,3 +92,6 @@ def play_deck_tricks(deck: Iterable[str], seq_a: str, seq_b: str) -> TricksOutco
     # A trick only happens when a pattern appears.
 
     return TricksOutcome(tricks_a=tricks_a, tricks_b=tricks_b)
+
+
+    

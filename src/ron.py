@@ -1,7 +1,7 @@
 # how do i load the deck from the data file? do I need to? 
 
 
-def score_ron(deck: list[str], seq1: list[str], seq2: list[str]) -> tuple[int, int]:
+def score_ron(deck: list[str], player1_choice: list[str], player2_choice: list[str]) -> tuple[int, int]:
     """
     This function will score a single deck. 
     Players will win cards in groups of 3 when their chosen sequence appears at the current
@@ -9,6 +9,10 @@ def score_ron(deck: list[str], seq1: list[str], seq2: list[str]) -> tuple[int, i
     
     The function will return a tuple of (player1_score, player2_score).
     """
+
+    # pull up some sort of raw data and partially processed data. 
+
+
     player1_score = 0
     player2_score = 0
 
@@ -17,10 +21,10 @@ def score_ron(deck: list[str], seq1: list[str], seq2: list[str]) -> tuple[int, i
     while i <= len(deck) - 3:
         grab_cards = deck[i:i+3] # grabs the next 3 cards of the deck
 
-        if grab_cards == seq1:
+        if grab_cards == player1_choice:
             player1_score += 3
             i += 3
-        elif grab_cards == seq2:
+        elif grab_cards == player2_choice:
             player2_score += 3
             i += 3
         else:
@@ -28,7 +32,7 @@ def score_ron(deck: list[str], seq1: list[str], seq2: list[str]) -> tuple[int, i
 
     return player1_score, player2_score
 
-def simulate_ron_game(decks: list[list[str]], seq1: list[str], seq2: list[str]) -> list[tuple[int, int]]:
+def simulate_ron_game(decks: list[list[str]], player1_choice: list[str], player2_choice: list[str]) -> list[tuple[int, int]]:
     """
     Simulate the game across many decks. 
     It returns wins for player1, draws, wins for player2.
@@ -39,7 +43,7 @@ def simulate_ron_game(decks: list[list[str]], seq1: list[str], seq2: list[str]) 
     draws = 0
 
     for deck in decks:
-        score1, score2 = score_ron(deck, seq1, seq2) # here I am using the previous score_ron for only one deck of cards.
+        score1, score2 = score_ron(deck, player1_choice, player2_choice ) # here I am using the previous score_ron for only one deck of cards.
 
         if score1 > score2:
             wins1 += 1
@@ -48,7 +52,10 @@ def simulate_ron_game(decks: list[list[str]], seq1: list[str], seq2: list[str]) 
         else:
             draws += 1
 
+        # add Eric's logic 
+
     return wins1, draws, wins2
     
+
 
 
