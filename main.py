@@ -3,22 +3,6 @@ from data.data import generate_deck
 from src.ron import score_ron
 '''
 
-from pathlib import Path
-from src.H_N import process_new_raw_decks, export_final_arrays
-
-def main():
-    raw_dir = Path("data/raw_decks")
-    processed_dir = Path("data/processed")
-
-    state = process_new_raw_decks(raw_dir, processed_dir, prefix="raw_decks")
-    export_final_arrays(processed_dir, state)
-
-    print(f"Total decks processed: {state.total}")
-
-if __name__ == "__main__":
-    main()
-
-
 
 
 
@@ -30,11 +14,11 @@ from src.combined1 import process_both_versions
 
 def main() -> None:
     # Update these if your folders differ
-    raw_dir = Path("data/raw_decks") / "raw_decks"      # where decks_0001.npy etc live
-    processed_dir = Path("data/processed") / "processed"  # where summary files will be written
+    raw_dir = Path("data/raw_decks/raw_decks")      # where decks_0001.npy etc live
+    processed_dir = Path("data/processed")   # where summary files will be written
     
     # Your generator uses prefix="decks" -> decks_0001.npy ...
-    process_both_versions(raw_dir=raw_dir, processed_dir=processed_dir, prefix="raw_decks")
+    process_both_versions(raw_dir=raw_dir, processed_dir=processed_dir, prefix="raw_decks_raw_decks")
 
 
 if __name__ == "__main__":
