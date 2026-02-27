@@ -37,6 +37,8 @@ def main() -> None:
     ron_win_pct  = np.load(processed_dir / "ron_win_pct.npy")
     ron_draw_pct = np.load(processed_dir / "ron_draw_pct.npy")
 
+    # display the results in a readable format
+
     print(f"\nH-N tricks win % matrix (8x8):")
     print(np.round(hn_win_pct * 100, 1))
 
