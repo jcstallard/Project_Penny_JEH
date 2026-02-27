@@ -5,7 +5,7 @@ from src.ron import score_ron
 
 
 
-
+'''
 from __future__ import annotations
 
 from pathlib import Path
@@ -20,6 +20,21 @@ def main() -> None:
     # Your generator uses prefix="decks" -> decks_0001.npy ...
     process_both_versions(raw_dir=raw_dir, processed_dir=processed_dir, prefix="raw_decks")
 
+
+if __name__ == "__main__":
+    main()
+'''
+
+from pathlib import Path
+from src.combined import process_both_versions
+
+def main() -> None:
+    project_root = Path(__file__).parent.resolve()
+
+    raw_dir = project_root / "data" / "raw_decks"
+    processed_dir = project_root / "data" / "processed"
+
+    process_both_versions(raw_dir=raw_dir, processed_dir=processed_dir, prefix="decks")
 
 if __name__ == "__main__":
     main()
