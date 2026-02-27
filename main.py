@@ -2,7 +2,7 @@ from pathlib import Path
 import numpy as np
 
 from pathlib import Path
-from src.combined_simple import process_both_games
+from src.combined_current import process_both_games
 
 # Show raw deck format and data
 
