@@ -47,7 +47,7 @@ def score_ron(deck: list, p1: list, p2: list) -> tuple[int, int]:
 def score_tricks(deck: list[str], p1: list[str], p2: list[str]) -> tuple[int, int]:
     """
     Score one deck under the original H-N tricks version.
-    Cards accumulate on the table until a sequence is matched — that player wins the trick.
+    Cards accumulate on the table until a sequence is matched, then that player wins the trick.
     Returns (tricks won by p1, tricks won by p2).
     """
     table = []
@@ -100,7 +100,7 @@ def process_both_games(raw_dir: str | Path = "data/raw_decks", out_dir: str | Pa
 
     # Load only decks we haven't processed yet
 
-    all_decks = load_decks(raw_dir, max_files=5) # delete max_files for full game
+    all_decks = load_decks(raw_dir, max_files=5) # delete max_files for full game. Right now its 5,000 decks (5 files x 1,000 decks each)
     new_decks = all_decks[n_done:]
     print(f"Loaded {len(new_decks)} new decks ({n_done} already processed)")
 
