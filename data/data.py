@@ -75,8 +75,8 @@ def load_decks_np(input_path: str | Path = None) -> np.ndarray:
 
 if __name__ == "__main__":
     # Number of decks to generate
-    total_decks = 1000000
-    chunk_size = 1000
+    total_decks = 3_000_000
+    chunk_size = 10_000
     output_dir = Path(__file__).parent / "raw_decks"
 
     decks = generate_decks(total_decks)
