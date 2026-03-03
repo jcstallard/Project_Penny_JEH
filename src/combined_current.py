@@ -100,7 +100,7 @@ def process_both_games(raw_dir: str | Path = "data/raw_decks", out_dir: str | Pa
 
     # Load only decks we haven't processed yet
 
-    all_decks = load_decks(raw_dir, max_files=5) # delete max_files for full game. Right now its 5,000 decks (5 files x 1,000 decks each)
+    all_decks = load_decks(raw_dir) # delete max_files for full game. Right now its 5,000 decks (5 files x 1,000 decks each)
     new_decks = all_decks[n_done:]
     print(f"Loaded {len(new_decks)} new decks ({n_done} already processed)")
 
