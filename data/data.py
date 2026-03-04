@@ -53,11 +53,13 @@ def save_decks_np_chunked(decks: list[list[str]], output_dir: str | Path = None,
     else:
         output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
+    # start numbering after existing files so we never overwrite
+    existing = sorted(output_dir.glob(f"{prefix}_*.npy"))
+    next_index = len(existing) + 1
     saved_files = []
-    total = len(decks)
-    for i, start in enumerate(range(0, total, chunk_size), 1):
-        chunk = decks[start:start+chunk_size]
-        file_path = output_dir / f"{prefix}_{i:04d}.npy"
+    for i, start in enumerate(range(0, len(decks), chunk_size)):
+        chunk = decks[start:start + chunk_size]
+        file_path = output_dir / f"{prefix}_{next_index + i:04d}.npy"
         np.save(file_path, np.array(chunk))
         saved_files.append(file_path)
     return saved_files
