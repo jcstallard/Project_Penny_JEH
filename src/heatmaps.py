@@ -82,6 +82,13 @@ def main() -> None:
     ron_win_pct: np.ndarray = np.load(PROCESSED_DIR / "ron_win_pct.npy")
     ron_draw_pct: np.ndarray = np.load(PROCESSED_DIR / "ron_draw_pct.npy")
 
+    # Remap from STRATEGIES order (RRR..BBB) to STRATEGY_LABELS order (BBB..RRR)
+    # and transpose so rows=opponent, cols=me shows "my" win percentage
+    hn_win_pct  = hn_win_pct[::-1, ::-1].T
+    hn_draw_pct = hn_draw_pct[::-1, ::-1].T
+    ron_win_pct = ron_win_pct[::-1, ::-1].T
+    ron_draw_pct = ron_draw_pct[::-1, ::-1].T
+
     # Get number of decks processed for the title
     state = np.load(PROCESSED_DIR / "state.npz")
     N: int = int(state["decks_processed"])

@@ -3,6 +3,7 @@ import numpy as np
 from pathlib import Path
 from data.data import generate_decks, save_decks_np_chunked
 from src.combined_current import process_both_games
+from src.heatmaps import main as generate_heatmaps
 
 
 LABELS = ["RRR", "RRB", "RBR", "RBB", "BRR", "BRB", "BBR", "BBB"]
@@ -92,6 +93,7 @@ def main() -> None:
         print(f"\nRon draw % matrix (8x8):")
         print(np.round(ron_draw_pct * 100, 1))
 
+        generate_heatmaps()
         print("\nDone! Updated heatmaps are located in figures/")
 
 

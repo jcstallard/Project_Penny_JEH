@@ -21,7 +21,7 @@ def load_decks(raw_dir_path="data/raw_decks", max_files: int | None = None) -> l
     Load decks from .npy files in the specified directory.
     Returns a list of decks, where each deck is a list of "1"/"0" strings.
     """
-    files = sorted(Path(raw_dir_path).glob("*.npy"))[:max_files] # delete this for full game
+    files = sorted(Path(raw_dir_path).glob("*.npy"))[:max_files] # delete max_files for full game
     return [
         list(row)
         for path in files
@@ -31,16 +31,27 @@ def load_decks(raw_dir_path="data/raw_decks", max_files: int | None = None) -> l
 
 # Rons version
 def score_ron(deck: list, p1: list, p2: list) -> tuple[int, int]:
-    "Basic scoring function for the Ron game. Counts how many times each player's pattern appears in the deck."
-    s1, s2, i = 0, 0, 0
-    while i <= len(deck) - 3:
-        chunk = deck[i:i+3]
-        if chunk == p1:
-            s1 += 3; i += 3
-        elif chunk == p2:
-            s2 += 3; i += 3
-        else:
-            i += 1
+    """
+    Score one deck under Ron's version (total cards won).
+    Same table-accumulation mechanic as the original H-N game, but instead of
+    counting tricks, each player's score is the total number of cards collected.
+    """
+    table = []
+    s1 = s2 = 0
+
+    for card in deck:
+        table.append(card)
+
+        if len(table) >= 3:
+            window = table[-3:]
+
+            if window == p1:
+                s1 += len(table)
+                table.clear()
+            elif window == p2:
+                s2 += len(table)
+                table.clear()
+
     return s1, s2
 
 # Original version
