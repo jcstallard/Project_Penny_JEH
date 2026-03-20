@@ -1,206 +1,166 @@
 # Project_Penny_JEH (Hakan, Eric, and Jacob)
 
-This repo is for our DATA 440 project on **Penney’s Game** and the **Humble–Nishiyama Randomness Game** using a standard 52‑card deck.
+This project simulates and visualizes results from **two versions** of the **Humble–Nishiyama (H‑N) Randomness Game**, using a playing-card variation of **Penney’s Game**.
 
-We simulate a lot of random decks, run **two different scoring rules**, and visualize the results as heatmaps:
+- **Original H‑N game (by tricks)**: score = number of **tricks** won.
+- **“Ron’s” version (by cards)**: score = total number of **cards** won.
 
-- **Original H‑N game (“by tricks”)** – score = number of tricks you win  
-- **Ron’s version (“by cards”)** – score = total number of cards you win  
+We treat a standard 52‑card deck as a sequence of **Red/Black** draws (encoded as `1` for red and `0` for black). For every ordered matchup of two 3‑card patterns, we simulate many decks and summarize results as **heatmaps**.
 
-In both versions, players choose fixed 3‑card color patterns like `RBB` or `BRR`, and we look at how often “my” pattern beats the opponent’s pattern.
-
----
-
-## 1. Background
-
-### 1.1 Penney’s Game (coin version)
-
-Penney’s Game is a probability game with a fair coin:
-
-- Player 1 picks a sequence of 3 flips, like `HHT`.
-- Player 2 then picks a *different* sequence of 3 flips, like `THH`.
-- We flip a coin repeatedly and write down the sequence.
-- Whoever’s pattern shows up **first** as a consecutive block wins.
-
-The surprising fact is that this game is **nontransitive**:  
-for any sequence Player 1 chooses, Player 2 can respond with a different sequence that’s actually **more likely** to appear first. So going second is a real advantage.
-
-For background:
+References (background reading):
 - Penney’s Game (Wikipedia): `https://en.wikipedia.org/wiki/Penney%27s_game`
+- Humble & Nishiyama paper: `https://mathwo.github.io/assets/files/penney_game/humble-nishiyama_randomness_game-a_new_variation_on_penneys_coin_game.pdf`
 
-### 1.2 Humble–Nishiyama Randomness Game (card version)
+## What is Penney’s Game?
 
-Humble and Nishiyama move the idea to playing cards. Instead of coins, we use **Red/Black**:
+In the classic coin version, Player 1 chooses a length‑3 sequence of Heads/Tails (e.g., `HTH`), Player 2 chooses another length‑3 sequence, and a fair coin is flipped until one of the sequences appears first as a consecutive block.
+
+The surprising feature is that the game is **nontransitive**: for any Player‑1 choice, Player 2 can choose a response that is **more likely** to appear first.
+
+## What is the Humble–Nishiyama Randomness Game?
+
+Humble & Nishiyama propose a card‑deck version using **Red/Black** instead of Heads/Tails:
 
 - Shuffle a standard 52‑card deck.
-- Ignore suits/ranks; just use color:
-  - Red = `1`
-  - Black = `0`
-- Each player locks in a **3‑card color pattern** for the entire game. We use:
-  - `RRR, RRB, RBR, RBB, BRR, BRB, BBR, BBB`
-- Turn over cards one at a time, forming a color sequence.
-- Whenever the last 3 cards match a player’s pattern, that player wins a **trick**:
-  - Those 3 cards are removed from the table and go into that player’s pile.
-  - Then we keep going with the remaining undealt cards.
-- We repeat until the deck is exhausted.
+- View it only by color: **Red = 1**, **Black = 0**.
+- Each player chooses a fixed **3‑card color pattern** for the whole game (one of `RRR, RRB, RBR, RBB, BRR, BRB, BBR, BBB`).
 
-This is the **original H‑N scoring**: whoever has more tricks wins.
+### The table mechanic (core gameplay, same for both versions)
 
-The short paper is here:
-- Humble & Nishiyama:  
-  `https://mathwo.github.io/assets/files/penney_game/humble-nishiyama_randomness_game-a_new_variation_on_penneys_coin_game.pdf`
+Cards are revealed one at a time and appended to a running “table” (a growing sequence). After each card:
 
-### 1.3 Ron’s version (by cards)
+1. Look at the **last 3 cards** on the table.
+2. If those 3 cards match **either** player’s 3‑card pattern, that player wins and the table is cleared.
 
-Our project also studies a second scoring rule that we call **Ron’s version**:
+So the **trigger event** is always “the last 3 cards match my pattern”, but what gets counted for the scoreboard depends on the version.
 
-- Pattern detection and tricks are the same as above.
-- The only change is **how we score**:
-  - we count **cards**, not tricks.
-  - each trick is still 3 cards, so your score is total cards collected.
+## Version A: Original H‑N (“counting tricks”)
 
-So:
+- When my pattern matches, I win **one trick event**.
+- The table is cleared (same as above).
+- Final score is the total number of trick events won.
 
-- **Trick version (original H‑N)**: “I got 7 tricks vs 3 tricks.”
-- **Card version (Ron)**: “I got 21 cards vs 9 cards.”
+Implementation detail: trick scoring counts **+1 per match event**, even though the table may contain more than 3 cards at the moment of the match.
 
-We want to see if this simple change in scoring makes any difference in who has the advantage.
+## Version B: Ron’s version (“counting cards”)
 
----
+- Same gameplay and table clearing.
+- When my pattern matches, I win **all cards currently on the table**.
+- Final score is the total number of cards won across the whole deck.
 
-## 2. Repo structure
+This means the “cards” payout per match event can be **greater than 3**, depending on how long the table has grown since the last clear.
 
-- **`main.py`**  
-  Entry point for the whole project. This is the **only** `.py` file in the repo root. It:
-  - lets you generate more random decks,
-  - scores all unprocessed decks for **both** games,
-  - and then regenerates the heatmaps.
+## Repo structure
 
+- **`main.py`** (root): the only script you run. It lets you:
+  - generate additional shuffled decks (append-only),
+  - score any unprocessed decks, update arrays, and regenerate the heatmaps.
 - **`src/`**
-  - `src/combined_current.py` – main simulation logic:
-    - loads decks from `data/raw_decks/`,
-    - scores all 8×8 pattern matchups,
-    - does both H‑N (tricks) and Ron (cards) at the same time,
-    - saves running totals + percentages.
-  - `src/heatmaps.py` – reads processed arrays and makes the two SVG heatmaps.
-  - `src/ron.py` – older/separate Ron‑only processor (kept for reference).
-  - `src/H_N.py` – older/separate H‑N (tricks) processor (also kept for reference).
-
+  - `src/combined_current.py`: incremental scoring for both games and writing processed results.
+  - `src/heatmaps.py`: generates SVG heatmaps from processed arrays.
+  - `src/ron.py`: kept for reference (older/separate Ron-only logic).
+  - `src/H_N.py`: kept for reference (older/separate H‑N logic).
 - **`data/`**
-  - `data/data.py` – helper functions for:
-    - generating random decks (26 red, 26 black, shuffled),
-    - saving them as chunked `.npy` files.
-  - `data/raw_decks/` – all generated decks as:
-    - `decks_0001.npy`, `decks_0002.npy`, …, up to `decks_0310.npy`, etc.
-    - We never overwrite these files.
-  - `data/processed/` – summary stats:
-    - `state.npz` – running counts of wins/draws + `decks_processed`.
-    - `hn_win_pct.npy`, `hn_draw_pct.npy`
-    - `ron_win_pct.npy`, `ron_draw_pct.npy`
-
+  - `data/data.py`: deck generation + chunked saving helpers.
+  - `data/raw_decks/`: randomly generated decks saved as chunked `.npy` files (created by running `main.py`).
+  - `data/processed/`: processed arrays and saved cumulative state (created by running `main.py`).
 - **`figures/`**
-  - `ByTricks.svg` – heatmap for **“My Chance of Win(Draw) by Tricks”**.
-  - `ByRon.svg` – heatmap for **“My Chance of Win(Draw) by Ron”**.
+  - `figures/ByTricks.svg`: final heatmap for the original H‑N game (“by tricks”).
+  - `figures/ByRon.svg`: final heatmap for Ron’s version (“by cards”).
 
----
+## How to run
 
-## 3. How to run it
-
-From the project root:
+From the repository root:
 
 ```bash
 uv run main.py
 ```
 
-The script will:
+You’ll see a prompt:
 
-1. Count how many decks are already **analyzed** vs how many are just sitting in `data/raw_decks/`.
-2. Ask you for an integer:
+- Enter a **positive integer** to generate that many **new decks** and save them under `data/raw_decks/` (existing decks are never overwritten).
+- Enter **0** to:
+  - score any unscored decks,
+  - update the processed outputs under `data/processed/`,
+  - print matchup summary tables and the win/draw matrices,
+  - regenerate the two heatmaps in `figures/`.
 
-   - If you enter a **positive integer** (like `1000`):
-     - it generates that many new random decks,
-     - saves them into `data/raw_decks/` as new files,
-     - then calls `main()` again so you can decide what to do next.
+### Incremental behavior (important requirement)
 
-   - If you enter **`0`**:
-     - it scores all **unprocessed** decks for:
-       - original H‑N (by tricks),
-       - Ron’s version (by cards),
-     - updates everything in `data/processed/`,
-     - prints out:
-       - how many decks have been analyzed total,
-       - a big table of wins and ties for both games,
-       - the 8×8 win and draw percentage matrices,
-     - and regenerates the two heatmaps in `figures/`.
+If you already have \(N\) decks on disk and you generate \(k\) more, the project appends new `.npy` deck chunks and then only scores the **new** decks when you choose `0`. Previously processed data is kept via `data/processed/state.npz`.
 
-### Incremental behavior (no wasted work)
+## Outputs
 
-The project is designed to **never throw away** work:
+### Heatmaps
 
-- Raw decks in `data/raw_decks/` are append‑only.
-- `state.npz` remembers how many decks have already been scored.
-- When you add more decks and then choose `0`, we only score the **new** decks and update totals.
+The main deliverables are:
 
-If we already have 3,000,000 decks processed and add 100 more, we end up with stats based on **3,000,100** decks without recomputing the first 3 million.
+- `figures/ByTricks.svg`: “My Chance of Win(Draw) by Tricks”
+- `figures/ByRon.svg`: “My Chance of Win(Draw) by Ron”
 
----
+Each heatmap is an 8×8 grid:
 
-## 4. Outputs
+- rows = “My Choice” (the row player’s 3‑card pattern)
+- columns = “Opponent Choice” (the column player’s 3‑card pattern)
+- each cell is labeled **Win(Draw)** in percent (example: `80(8)`).
 
-### 4.1 Heatmaps
+### Processed arrays
 
-The main visuals are:
+When you score decks, these arrays are written to `data/processed/`:
 
-- `figures/ByTricks.svg` – original H‑N game (tricks).
-- `figures/ByRon.svg` – Ron’s game (cards).
+- `hn_win_pct.npy`, `hn_draw_pct.npy` (H‑N tricks version)
+- `ron_win_pct.npy`, `ron_draw_pct.npy` (Ron cards version)
+- `state.npz` (cumulative counts + `decks_processed`)
 
-Each is an 8×8 grid:
+The heatmap generator reads these files to build the SVGs in `figures/`.
 
-- rows = “My Choice” (my 3‑card pattern),
-- columns = “Opponent Choice” (their pattern),
-- each cell label is `Win(Draw)` in percent, e.g. `80(8)`.
+## Findings (from our simulation results)
 
-The titles of the SVGs show the number of decks used in the stats.  
-In the versions checked in, both say:
+For the heatmaps currently in `figures/`, the simulation size is **N = 3,000,100** simulated decks (as shown in the titles embedded in `ByTricks.svg` and `ByRon.svg`).
 
-- `N = 3,000,000`
+### 1) Second-player advantage is very strong (both games)
+In both heatmaps, the best “response” pattern for the responding player creates cells where the response player wins a large majority of the time, while the same response is very bad when switched with different opponent choices. You can see this directly from the contrast between the “top” cells in each row/column matchup vs the “bottom” cells (single-digit win probabilities).
 
-So all percentages are based on 3 million simulated decks.
+Example (Tricks heatmap):
+- If the opponent uses `BBB`, the strongest response is `RBB` with **99(0)**.
+- If the opponent uses `BBR`, the strongest response is `RBB` with **94(4)**, while several other responses are dramatically worse (e.g., `BRR` gives **5(7)** and `RRR` gives **1(2)**).
 
-### 4.2 Processed arrays
+Example (Ron-by-cards heatmap):
+- If the opponent uses `BBR`, the strongest response is again `RBB` with **100(0)**.
 
-Under `data/processed/`:
+### 2) Best response patterns (Tricks vs Ron)
+Because the heatmap shows “My Chance of Win(Draw)”, we can treat the “best response” for a given opponent pattern as the `My Choice` giving the highest win percentage against that opponent choice.
 
-- `hn_win_pct.npy`, `hn_draw_pct.npy` – for the H‑N trick game.
-- `ron_win_pct.npy`, `ron_draw_pct.npy` – for Ron’s card game.
-- `state.npz` – all raw counts + `decks_processed`.
+#### By tricks (original H-N, scoring by tricks)
+Strong best responses visible in `ByTricks.svg` include:
+- Opponent `BBB` -> `RBB` **99(0)** (also strong: `RRB` **97(2)**)
+- Opponent `BBR` -> `RBB` **94(4)**
+- Opponent `BRB` -> `BBR` **80(8)** (also strong: `RRB` **79(9)**)
+- Opponent `BRR` -> `BBR` **88(7)**
+- Opponent `RBB` -> `RRB` **88(7)**
+- Opponent `RBR` -> `RRB` **80(8)** (close competitor: `BBR` **79(9)**)
+- Opponent `RRB` -> `BRR` **94(4)**
+- Opponent `RRR` -> `BRR` **99(0)** (also strong: `BBR` **97(2)**)
 
-`src/heatmaps.py` reads these to build the figures.
+#### By Ron (same gameplay, scoring by total cards won)
+In `ByRon.svg`, the best responses are very similar, but the “winner” can switch in a couple cases and the best cells often become more extreme (more near-100% wins, often with 0 draws):
+- Opponent `BBB` -> `RBB` **100(0)** (also strong: `RRB` **99(0)**)
+- Opponent `BBR` -> `RBB` **100(0)**
+- Opponent `BRB` -> `RRB` **92(1)** (note: this beats the top `BBR` value **86(1)**)
+- Opponent `BRR` -> `BBR` **96(1)**
+- Opponent `RBB` -> `RRB` **96(1)**
+- Opponent `RBR` -> `BBR` **92(1)** (note: this flips the “best response” compared to the tricks heatmap)
+- Opponent `RRB` -> `BRR` **100(0)**
+- Opponent `RRR` -> `BRR` **100(0)** (also strong: `BBR` **99(0)**)
 
----
+### 3) What changes when scoring by cards?
+Overall, switching from “by tricks” to “by cards” does not remove the nontransitive structure, but it does affect details:
+- **More extreme outcomes**: the “best response” cells often increase toward 100% wins and draws become rarer (many top cells show **(0)** or **(1)** draws).
+- **Sometimes the optimal response switches**: in the data above, the best response to `BRB` and to `RBR` changes when you switch scoring (tricks prefers `BBR` vs `BRB`, and `RRB` vs `RBR`, while Ron-by-cards prefers `RRB` vs `BRB` and `BBR` vs `RBR`).
 
-## 5. What we found (high‑level summary)
-
-Based on 3,000,000 decks:
-
-- **Going second is very strong** in both scoring systems.  
-  If Player 2 picks a “best response” pattern against Player 1’s choice (like in the Penney’s Game tables), their win percentage is often very high (frequently in the 70–95% range). This lines up with the Humble–Nishiyama paper.
-
-- **Changing from tricks to cards doesn’t change the big picture.**  
-  Switching from counting tricks to counting cards:
-  - keeps the nontransitive structure,
-  - keeps the strong second‑player advantage,
-  - but does tweak the exact win and draw percentages in some matchups.
-
-- **Some starting patterns are clearly bad.**  
-  Looking across rows in the heatmaps, a few patterns consistently perform poorly when the opponent responds optimally, in both versions of the game.
-
-To see exact numbers yourself:
-
-1. Run `uv run main.py`.
-2. Enter `0`.
-3. Look at the printed matrices and open `figures/ByTricks.svg` and `figures/ByRon.svg`.
-
-Overall, the project confirms the idea from the paper:  
-the Humble–Nishiyama card game, like Penney’s Game, strongly favors the **second player**, and that advantage survives even when we change the scoring rule from tricks to cards.
+### 4) How to re-check with the latest run
+To confirm the newest numbers yourself:
+1. Run `uv run main.py`
+2. Enter `0`
+3. Use the printed matrices and open `figures/ByTricks.svg` and `figures/ByRon.svg`
 
