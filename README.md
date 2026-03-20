@@ -15,8 +15,6 @@ References (background reading):
 
 In the classic coin version, Player 1 chooses a length‑3 sequence of Heads/Tails (e.g., `HTH`), Player 2 chooses another length‑3 sequence, and a fair coin is flipped until one of the sequences appears first as a consecutive block.
 
-The surprising feature is that the game is **nontransitive**: for any Player‑1 choice, Player 2 can choose a response that is **more likely** to appear first.
-
 ## What is the Humble–Nishiyama Randomness Game?
 
 Humble & Nishiyama propose a card‑deck version using **Red/Black** instead of Heads/Tails:
